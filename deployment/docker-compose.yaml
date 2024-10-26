@@ -1,14 +1,16 @@
 services:
 
   db:
-    image: timescale/timescaledb:latest-pg16
+    image: postgres:latest
     ports:
       - 5432:5432
     volumes:
       - ./volumes:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=smartcomplain
+      POSTGRES_USER: smartcomplaints
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: smartcomplaints
 
   api:
     image: hamelnhackt/backend-api:0.0.1
