@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse, Response
 
 from imageToText import *
 from models import Info, ComplaintData, ComplaintGuess, Category
+from object_detection import *
 
 import os
 import tempfile
@@ -62,11 +63,14 @@ def get_complaint() -> List[ComplaintData]:
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
 async def create_upload_file(file: UploadFile):
     contents = await file.read()
-    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
+    img_class = start_detection(contents)
+    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class=img_class, category=0)
    
     id = db.save_complaint(c)
     print("Image inserted with id " + str(id))
     add_class_with_image_to_text(id)
+    db.save_complaint(c)
+    
     return ComplaintGuess(guess="test", confidence=0.5)
 
 def add_class_with_image_to_text(imageid):

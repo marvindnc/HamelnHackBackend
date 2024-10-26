@@ -130,7 +130,9 @@ def do_inferencing(source, model_size, class_list):
     height      = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps         = cap.get(cv2.CAP_PROP_FPS)
     frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    
     logger.info("start inferencing")
+
     # instanciate yolo model
     model = YOLO(model_name(model_size, task="detect"))
     image = cv2.imread(source)
@@ -172,9 +174,14 @@ def do_inferencing(source, model_size, class_list):
     cv2.destroyAllWindows()
     logger.info("Stopped inferencing")
 
-if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('videosource', help='any video source opencv understands, e.g. 0,1,... for usb cams, "rtsp://..." for RTSP streams, /path/video.mp4 for video file')
-    arg_parser.add_argument('-m', '--model-size', choices=['n', 's', 'm', 'l', 'x'], default='n', help='the size of the model to use (nano, small, medium, large, xlarge); defaults to "nano"')
-    args = arg_parser.parse_args()
-    do_inferencing(args.videosource, args.model_size, COCO_CLASSES)
+    return predictions_output[0]
+
+def start_detection(image):
+    do_inferencing(image, 'n', COCO_CLASSES)
+
+# if __name__ == '__main__':
+#     arg_parser = argparse.ArgumentParser()
+#     arg_parser.add_argument('videosource', help='any video source opencv understands, e.g. 0,1,... for usb cams, "rtsp://..." for RTSP streams, /path/video.mp4 for video file')
+#     arg_parser.add_argument('-m', '--model-size', choices=['n', 's', 'm', 'l', 'x'], default='n', help='the size of the model to use (nano, small, medium, large, xlarge); defaults to "nano"')
+#     args = arg_parser.parse_args()
+#     do_inferencing(args.videosource, args.model_size, COCO_CLASSES)

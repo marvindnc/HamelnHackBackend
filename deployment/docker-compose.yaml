@@ -12,13 +12,13 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: smartcomplaints
 
-  api:
-    image: hamelnhackt/backend-api:0.0.1
-    ports:
-      - 8000:8000
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
+  # api:
+  #   image: hamelnhackt/backend-api:0.0.1
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     DB_HOST: db
+  #     DB_PORT: 5432
 
   frontend:
     image: hamelnhackt/frontend:0.0.1
