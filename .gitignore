@@ -165,3 +165,5 @@ smartcomplain-api/backend/inferenced.jpg
 smartcomplain-api/backend/inferenced_blurred.jpg
 volumes
 deployment/volumes
+smartcomplain-api/api/inferenced_blurred.jpg
+smartcomplain-api/api/inferenced.jpg
