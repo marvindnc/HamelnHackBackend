@@ -1,6 +1,7 @@
 from imageToText import *
 import os
 
+
 model_url = os.environ['LLM_MODEL']
 img_classes = os.environ['IMG_CLASSES']
 print(img_classes)

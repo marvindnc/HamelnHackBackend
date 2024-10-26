@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
 from models import Info, ComplaintData, ComplaintGuess
+#from .backend.imageToText import *
 
 import os
 import tempfile
@@ -56,8 +57,8 @@ def get_info() -> List[ComplaintData]:
 async def create_upload_file(file: UploadFile):
     contents = await file.read()
     c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
-    
     db.save_complaint(c)
+    
     return ComplaintGuess(guess="test", confidence=0.5)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
@@ -66,6 +67,7 @@ def get_image_as_file(id: int) -> bytes:
     return Response(content=im[0], media_type="image/jpg")
 
 if __name__ == '__main__':
+    getImageClass("https://sensoneo.com/wp-content/uploads/2023/02/global-waste-index-2022-1024x536-1.png")
     db_host = os.environ['DB_HOST']
     db_port = os.environ['DB_PORT']    
     db.connect(db_host, db_port)
