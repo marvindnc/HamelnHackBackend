@@ -20,10 +20,22 @@ def save_complaint(complaint):
                    (complaint.description, complaint.capture_time, psycopg2.Binary(complaint.image), complaint.image_class, complaint.category))
     conn.commit()
 
+def get_complaint(id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM complaints WHERE id = %s", (id, ))
+    result = cursor.fetchone()
+    return result
+
 def get_categories():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM categories")
     result = cursor.fetchall()
+    return result
+
+def get_category(id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM categories WHERE id = %s", (id,))
+    result = cursor.fetchone()
     return result
 
 def get_image(id):
