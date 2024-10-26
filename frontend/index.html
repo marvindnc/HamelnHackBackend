@@ -1,9 +1,11 @@
-<html>
+<!DOCTYPE html>
+<html lang="de">
 <head>
     <title>Mängelmelder</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"> </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.rawgit.com/exif-js/exif-js/master/exif.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,8 +46,22 @@
             font-size: 16px;
             font-weight: bold;
         }
+        .processing-message {
+            display: none; /* Versteckt die Verarbeitungsnachricht initial */
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        #responseMessage {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #map-image {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+            display: none; /* Das Bild wird initial nicht angezeigt */
+        }
     </style>
-</head>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light">
@@ -71,46 +87,100 @@
             <button type="submit" class="btn btn-custom">Bild intelligent hochladen</button>
         </form>
 
+        <p class="processing-message" id="processingMessage">Ihr Bild wird verarbeitet...</p>
         <p id="responseMessage"></p>
+        <img id="map-image" alt="Google Maps Location" />
     </div>
 
     <script>
         function previewImage(event) {
             var reader = new FileReader();
-            reader.onload = function(){
+            reader.onload = function() {
                 var output = document.getElementById('image-preview');
                 output.innerHTML = '<img src="' + reader.result + '" alt="Image Preview" style="max-width: 200px; max-height: 200px;"/>';
+
+                // EXIF-Daten aus dem Bild lesen
+                EXIF.getData(event.target.files[0], function() {
+                    var lat = EXIF.getTag(this, "GPSLatitude");
+                    var latRef = EXIF.getTag(this, "GPSLatitudeRef");
+                    var lon = EXIF.getTag(this, "GPSLongitude");
+                    var lonRef = EXIF.getTag(this, "GPSLongitudeRef");
+                    var dateTime = EXIF.getTag(this, "DateTime");
+
+                    // Konvertiere GPS-Daten in lesbares Format
+                    var geoLocation = 'n.A.';
+                    if (lat && lon) {
+                        lat = lat[0] + lat[1] / 60 + lat[2] / 3600; // Konvertiere nach Dezimalgrad
+                        if (latRef === 'S') lat = -lat; // Negative Werte für Süden
+                        lon = lon[0] + lon[1] / 60 + lon[2] / 3600; // Konvertiere nach Dezimalgrad
+                        if (lonRef === 'W') lon = -lon; // Negative Werte für Westen
+                        geoLocation = lat.toFixed(5) + '° N, ' + lon.toFixed(5) + '° E';
+
+                        // Google Maps URL für den Standort generieren
+                        var mapImageUrl = 'https://maps.googleapis.com/maps/api/staticmap?center=' + lat + ',' + lon +
+                                          '&zoom=15&size=600x400&markers=color:red%7C' + lat + ',' + lon +
+                                          '&key=YOUR_GOOGLE_MAPS_API_KEY';
+                        document.getElementById('map-image').src = mapImageUrl;
+                        document.getElementById('map-image').style.display = 'block';
+                    }
+
+                    // Setze EXIF-Daten in einer globalen Variable für die Verwendung später
+                    window.exifData = {
+                        geoLocation: geoLocation,
+                        dateTime: dateTime || 'n.A.'
+                    };
+                });
             };
             reader.readAsDataURL(event.target.files[0]);
         }
-        $( document ).ready(function() {
 
+        $(document).ready(function() {
             $('#imageupload').on('submit', function(event) {
-                event.preventDefault(); // Prevent the default form submission
-                console.log($('#file-input')[0])
+                event.preventDefault(); // Verhindert die Standard-Formularübermittlung
                 var fileInput = $('#file-input')[0];
                 var file = fileInput.files[0];
 
                 var formData = new FormData();
                 formData.append('file', file);                
 
-                // Send the AJAX POST request
+                // Sende die AJAX POST-Anfrage
                 $.ajax({
-                url: 'http://localhost:8000/smartcomplaint/uploadimage/', // Replace with your server endpoint
-                type: 'POST',
-                data: formData,
-                processData: false, // Prevent jQuery from processing the data
-                contentType: false, // Prevent jQuery from setting contentType
-                success: function(response) {
-                    $('#responseMessage').text('Vermutlicher Mangel: ' + response.guess + ' mit Konfidenz: ' + response.confidence);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    $('#responseMessage').text('Upload failed: ' + textStatus + ' - ' + errorThrown);
-                }
+                    url: 'http://localhost:8000/smartcomplaint/uploadimage/', // Ersetze dies durch deinen Server-Endpunkt
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // Verhindert, dass jQuery die Daten verarbeitet
+                    contentType: false, // Verhindert, dass jQuery den Content-Type festlegt
+                    success: function(response) {
+                        // Verarbeitungsnachricht anzeigen
+                        $('#processingMessage').show();
+                        // Nach 3 Sekunden das Ergebnis anzeigen
+                        setTimeout(function() {
+                            // Zugriff auf die EXIF-Daten
+                            var geoLocation = window.exifData ? window.exifData.geoLocation : 'n.A.';
+                            var dateTime = window.exifData ? window.exifData.dateTime : 'n.A.';
+                            var currentDateTime = new Date().toLocaleString('de-DE'); // Aktuelle Uhrzeit im deutschen Format
+
+                            $('#responseMessage').html(
+                                'Erkannter Mangel: ' + response.guess + '<br>' +
+                                'Wahrscheinlichkeit: ' + response.confidence + '%<br>' +
+                                'Geolocation: ' + geoLocation + '<br>' +
+                                'Uhrzeit (Aufnahme): ' + dateTime + '<br>' +
+                                'Uhrzeit (Aktuell): ' + currentDateTime
+                            );
+
+                            $('#processingMessage').hide(); // Verstecke die Verarbeitungsnachricht
+                            // Bild-Upload-Element ausblenden
+                            $('.upload-box').hide();
+                            $('#file-input').prop('disabled', true); // Deaktiviere das Upload-Feld
+                            $('button[type="submit"]').prop('disabled', true); // Deaktiviere den Button
+                        }, 3000); // 3000 Millisekunden = 3 Sekunden
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#responseMessage').text('Upload failed: ' + textStatus + ' - ' + errorThrown);
+                    }
                 });
             });
         });
-
     </script>
 </body>
 </html>
