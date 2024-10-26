@@ -67,7 +67,7 @@ def get_image_as_file(id: int) -> bytes:
     return Response(content=im[0], media_type="image/jpg")
 
 if __name__ == '__main__':
-    getImageClass("https://sensoneo.com/wp-content/uploads/2023/02/global-waste-index-2022-1024x536-1.png")
+    #getImageClass("https://sensoneo.com/wp-content/uploads/2023/02/global-waste-index-2022-1024x536-1.png")
     db_host = os.environ['DB_HOST']
     db_port = os.environ['DB_PORT']    
     db.connect(db_host, db_port)
