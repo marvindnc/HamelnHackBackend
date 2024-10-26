@@ -1,7 +1,5 @@
 import psycopg2
 
-from models import ImageData
-
 def connect(db_host, db_port):
     global conn;
     conn = psycopg2.connect(database="smartcomplaints",
@@ -16,11 +14,11 @@ def get_complaints():
     result = cursor.fetchall()
     return result
 
-def get_images():
+def save_complaint(complaint):
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM images")
-    result = cursor.fetchall()
-    return result
+    cursor.execute("INSERT INTO complaints (description, capture_time, image, image_class, category) VALUES (%s, %s, %s, %s, %s)", 
+                   (complaint.description, complaint.capture_time, psycopg2.Binary(complaint.image), complaint.image_class, complaint.category))
+    conn.commit()
 
 def get_categories():
     cursor = conn.cursor()
@@ -28,20 +26,9 @@ def get_categories():
     result = cursor.fetchall()
     return result
 
-def save_image(image_data):
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO images (image, image_class, category) VALUES (%s,%s,%s)", (psycopg2.Binary(image_data.image),image_data.image_class, image_data.category))
-    conn.commit()
-
 def get_image(id):
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM images WHERE id = %s", (id,))
-    result = cursor.fetchone()
-    return result
-
-def search_club_by_name(name):
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM clubs WHERE name LIKE %(name)s", { 'name': '%{}%'.format(name)})
+    cursor.execute("SELECT image FROM complaints WHERE id = %s", (id,))
     result = cursor.fetchone()
     return result
 
