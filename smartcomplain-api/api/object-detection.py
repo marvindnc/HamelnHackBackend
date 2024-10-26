@@ -103,13 +103,13 @@ def model_name(size, task):
     return f'yolov8{size}{suffix}.pt'
 
 # Erlaubte Klassen fuer den Blur
-ALLOWED_CLASSES = {'person', 'car'}  
+#ALLOWED_CLASSES = {'person', 'car', 'truck', 'motorcycle', 'bus'}  
 
 # Funktion zum Blurren erkannter Objekte
 def blur_detected_objects(image, predictions):
     for detection in predictions[0].boxes:  # Zugriff auf das 'boxes'-Attribut
         class_id = int(detection.cls[0])  # Extrahiere Klassen-ID
-        if class_id in [COCO_CLASSES['person'], COCO_CLASSES['car']]:  # Klasse prüfen
+        if class_id in [COCO_CLASSES['person'], COCO_CLASSES['car'], COCO_CLASSES['truck'], COCO_CLASSES['motorcycle'], COCO_CLASSES['bus']]:  # Klasse prüfen
             # Bounding Box-Koordinaten abrufen und in Integer konvertieren
             x1, y1, x2, y2 = map(int, detection.xyxy[0])
             roi = image[y1:y2, x1:x2]
@@ -138,7 +138,7 @@ def do_inferencing(source, model_size, class_list):
     
     predictions_output = ""
     
-    # Ausgabe der Vorhersagen in der Konsole
+    # Schreiben der Vorhersage in die Variable predictions_output
     for i, prediction in enumerate(predictions):
         logger.info(f"Prediction {i + 1}:")
         for box in prediction.boxes:
@@ -153,9 +153,9 @@ def do_inferencing(source, model_size, class_list):
             #predictions_output += f"    Bounding Box: ({x1}, {y1}), ({x2}, {y2})\n"
 
     # Optionale Ausgabe der gesammelten Vorhersagen
-    logger.info(predictions_output)  # Logge die Vorhersagen, wenn gewünscht
-    # print(predictions_output)  # Falls du die Vorhersagen auf der Konsole sehen willst
-
+    logger.info(predictions_output)  # Logge die Vorhersagen
+    
+    # Plot für das 1. image
     res_plotted = predictions[0].plot()
     cv2.imwrite("inferenced.jpg", res_plotted)
 
