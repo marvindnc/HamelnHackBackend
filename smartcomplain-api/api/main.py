@@ -85,6 +85,14 @@ def get_image_as_file(id: int) -> Category:
     category = db.get_category(id)
     return Category(id=category[0], classes=category[1], category=category[2])
 
+@app.get(contextPathBase + '/category/class/{id}', response_model=List[Category])
+def get_categories() -> List[Category]:
+    result = []
+    categories = db.get_category_by_class(id)
+    print(categories)
+    for category in categories:
+        result.append(Category(id=category[0], classes=category[1], category=category[2]))
+    return result
 
 if __name__ == '__main__':
     db_host = os.environ['DB_HOST']

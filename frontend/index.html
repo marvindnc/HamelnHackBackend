@@ -8,8 +8,9 @@
     <script src="https://cdn.rawgit.com/exif-js/exif-js/master/exif.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Century Gothic', Arial, sans-serif; /* Schriftart geändert */
             background-color: #f8f9fa;
+            color: rgb(0, 92, 169); /* Schriftfarbe geändert */
         }
         .navbar {
             background-color: #fff;
@@ -33,6 +34,7 @@
             justify-content: center;
             background-color: #f0f0f0;
             margin-bottom: 20px;
+            cursor: pointer;
         }
         .upload-box i {
             font-size: 24px;
@@ -46,8 +48,15 @@
             font-size: 16px;
             font-weight: bold;
         }
+        .btn-reset {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            background-color: #fff;
+        }
         .processing-message {
-            display: none; /* Versteckt die Verarbeitungsnachricht initial */
+            display: none;
             font-weight: bold;
             margin-top: 10px;
         }
@@ -55,11 +64,33 @@
             margin-top: 20px;
             font-weight: bold;
         }
-        #map-image {
-            margin-top: 20px;
-            max-width: 100%;
-            height: auto;
-            display: none; /* Das Bild wird initial nicht angezeigt */
+
+        /* Styles für den Erklärungstext */
+        .instruction-text {
+            background-color: rgb(175, 202, 11); /* Hintergrundfarbe für den Erklärungstext */
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px; /* Abstand unter dem Text */
+        }
+
+        /* Styles für die blaue Linie */
+        .blue-line {
+            height: 1px; /* Höhe auf 1px geändert */
+            background-color: blue; /* Farbe der Linie */
+            margin-bottom: 20px; /* Abstand nach der Linie */
+        }
+
+        /* Styles for bottom-right image */
+        .bottom-right-image {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 130px; /* Adjust size to be 30px larger than previous 100px */
+            z-index: 1000;
+        }
+        .bottom-right-image img {
+            width: 100%; /* Make image responsive */
+            border-radius: 8px; /* Optional rounded corners */
         }
     </style>
 </head>
@@ -76,20 +107,41 @@
     <div class="container">
         <h1 class="mt-4">M&auml;ngelmelder</h1>
         <h5 class="mt-3">Fotoupload</h5>
-        <p>Bitte machen Sie Fotos des vorliegenden Mangels. Bitte achten Sie darauf, dass man den Mangel gut erkennen kann und dass keine Personen auf dem Bild zu sehen sind.</p>
+        <div class="instruction-text">
+            <p>Bitte machen Sie Fotos des vorliegenden Mangels. Bitte achten Sie darauf, dass man den Mangel gut erkennen kann und dass keine Personen auf dem Bild zu sehen sind.</p>
+        </div>
+        <div class="blue-line"></div> <!-- Blaue Linie zwischen Text und Upload-Feld -->
         <form id="imageupload">
-            <div class="upload-box" onclick="document.getElementById('file-input').click();">
-                <i class="fas fa-upload"></i>
+            <div class="d-flex">
+                <div class="upload-box" onclick="document.getElementById('file-input').click();">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <input type="file" id="file-input" name="imageFile" style="display: none;" accept="image/*" onchange="previewImage(event)">
             </div>
-            <input type="file" id="file-input" name="imageFile" style="display: none;" accept="image/*" onchange="previewImage(event)">
 
             <div id="image-preview" style="margin-top: 10px;"></div>
+            
+            <!-- Füge die blaue Linie unter dem Upload-Feld hinzu -->
+            <div class="blue-line"></div>
+
             <button type="submit" class="btn btn-custom">Bild intelligent hochladen</button>
         </form>
 
         <p class="processing-message" id="processingMessage">Ihr Bild wird verarbeitet...</p>
         <p id="responseMessage"></p>
-        <img id="map-image" alt="Google Maps Location" />
+
+        <!-- Zurück zum Start Button -->
+        <button id="resetButton" class="btn btn-reset" onclick="resetForm()">Zurück zum Start</button>
+
+        <!-- Thank you message -->
+        <p class="mt-4" id="thankYouMessage" style="font-weight: bold; display: none;">Vielen Dank für ihre Meldung, wir werden uns schnellst möglich darum kümmern.</p>
+    </div>
+
+    <!-- Bottom-right image link -->
+    <div class="bottom-right-image">
+        <a href="https://hapy-vernetzt.de/cms/" target="_blank">
+            <img src="https://hapy-vernetzt.de/cms/wp-content/uploads/2023/09/Ha-Py-Smart-City-Landkreis-Hameln-Pyrmont-rgb-4.jpg" alt="Ha-Py Smart City">
+        </a>
     </div>
 
     <script>
@@ -98,89 +150,122 @@
             reader.onload = function() {
                 var output = document.getElementById('image-preview');
                 output.innerHTML = '<img src="' + reader.result + '" alt="Image Preview" style="max-width: 200px; max-height: 200px;"/>';
-
-                // EXIF-Daten aus dem Bild lesen
-                EXIF.getData(event.target.files[0], function() {
-                    var lat = EXIF.getTag(this, "GPSLatitude");
-                    var latRef = EXIF.getTag(this, "GPSLatitudeRef");
-                    var lon = EXIF.getTag(this, "GPSLongitude");
-                    var lonRef = EXIF.getTag(this, "GPSLongitudeRef");
-                    var dateTime = EXIF.getTag(this, "DateTime");
-
-                    // Konvertiere GPS-Daten in lesbares Format
-                    var geoLocation = 'n.A.';
-                    if (lat && lon) {
-                        lat = lat[0] + lat[1] / 60 + lat[2] / 3600; // Konvertiere nach Dezimalgrad
-                        if (latRef === 'S') lat = -lat; // Negative Werte für Süden
-                        lon = lon[0] + lon[1] / 60 + lon[2] / 3600; // Konvertiere nach Dezimalgrad
-                        if (lonRef === 'W') lon = -lon; // Negative Werte für Westen
-                        geoLocation = lat.toFixed(5) + '° N, ' + lon.toFixed(5) + '° E';
-
-                        // Google Maps URL für den Standort generieren
-                        var mapImageUrl = 'https://maps.googleapis.com/maps/api/staticmap?center=' + lat + ',' + lon +
-                                          '&zoom=15&size=600x400&markers=color:red%7C' + lat + ',' + lon +
-                                          '&key=YOUR_GOOGLE_MAPS_API_KEY';
-                        document.getElementById('map-image').src = mapImageUrl;
-                        document.getElementById('map-image').style.display = 'block';
-                    }
-
-                    // Setze EXIF-Daten in einer globalen Variable für die Verwendung später
-                    window.exifData = {
-                        geoLocation: geoLocation,
-                        dateTime: dateTime || 'n.A.'
-                    };
-                });
+                readExifData(event.target.files[0]);
             };
             reader.readAsDataURL(event.target.files[0]);
         }
 
+        function readExifData(file) {
+            // EXIF-Daten aus dem Bild lesen
+            EXIF.getData(file, function() {
+                var lat = EXIF.getTag(this, "GPSLatitude");
+                var latRef = EXIF.getTag(this, "GPSLatitudeRef");
+                var lon = EXIF.getTag(this, "GPSLongitude");
+                var lonRef = EXIF.getTag(this, "GPSLongitudeRef");
+                var dateTime = EXIF.getTag(this, "DateTime");
+
+                var geoLocation = 'n.A.';
+                if (lat && lon) {
+                    lat = lat[0] + lat[1] / 60 + lat[2] / 3600;
+                    if (latRef === 'S') lat = -lat;
+                    lon = lon[0] + lon[1] / 60 + lon[2] / 3600;
+                    if (lonRef === 'W') lon = -lon;
+                    geoLocation = { lat: lat.toFixed(5), lon: lon.toFixed(5) };
+
+                    // Call to get address from coordinates
+                    getAddressFromCoordinates(geoLocation.lat, geoLocation.lon);
+                }
+
+                window.exifData = {
+                    geoLocation: geoLocation,
+                    dateTime: dateTime || 'n.A.'
+                };
+            });
+        }
+
+        function getAddressFromCoordinates(lat, lon) {
+            $.ajax({
+                url: `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,
+                type: 'GET',
+                success: function(data) {
+                    var address = data.address.road || 'Straße unbekannt';
+                    var city = data.address.city || data.address.town || 'Ort unbekannt';
+                    var houseNumber = data.address.house_number || '';
+                    var locationDetails = `${address} ${houseNumber}, ${city}`;
+
+                    window.exifData.address = locationDetails;
+                },
+                error: function() {
+                    window.exifData.address = 'Adresse konnte nicht ermittelt werden';
+                }
+            });
+        }
+
         $(document).ready(function() {
             $('#imageupload').on('submit', function(event) {
-                event.preventDefault(); // Verhindert die Standard-Formularübermittlung
+                event.preventDefault();
                 var fileInput = $('#file-input')[0];
-                var file = fileInput.files[0];
+                var file = fileInput.files[0]; // Only use the upload input
+
+                if (!file) {
+                    alert("Bitte wählen Sie ein Bild aus.");
+                    return;
+                }
 
                 var formData = new FormData();
-                formData.append('file', file);                
+                formData.append('file', file);
 
-                // Sende die AJAX POST-Anfrage
                 $.ajax({
-                    url: 'http://localhost:8000/smartcomplaint/uploadimage/', // Ersetze dies durch deinen Server-Endpunkt
+                    url: 'http://localhost:8000/smartcomplaint/uploadimage/',
                     type: 'POST',
                     data: formData,
-                    processData: false, // Verhindert, dass jQuery die Daten verarbeitet
-                    contentType: false, // Verhindert, dass jQuery den Content-Type festlegt
+                    processData: false,
+                    contentType: false,
                     success: function(response) {
-                        // Verarbeitungsnachricht anzeigen
                         $('#processingMessage').show();
-                        // Nach 3 Sekunden das Ergebnis anzeigen
                         setTimeout(function() {
-                            // Zugriff auf die EXIF-Daten
                             var geoLocation = window.exifData ? window.exifData.geoLocation : 'n.A.';
                             var dateTime = window.exifData ? window.exifData.dateTime : 'n.A.';
-                            var currentDateTime = new Date().toLocaleString('de-DE'); // Aktuelle Uhrzeit im deutschen Format
+                            var address = window.exifData.address || 'Adresse nicht verfügbar';
+                            var currentDateTime = new Date().toLocaleString('de-DE');
+                            var confidencePercentage = Math.round(response.confidence * 100);
 
                             $('#responseMessage').html(
-                                'Erkannter Mangel: ' + response.guess + '<br>' +
-                                'Wahrscheinlichkeit: ' + response.confidence + '%<br>' +
-                                'Geolocation: ' + geoLocation + '<br>' +
+                                'Erkannter Mangel: ' + response.guess +
+                                '<br>' +
+                                'Wahrscheinlichkeit: ' + confidencePercentage + '%<br>' +
+                                'Standort: ' + address + '<br>' +
+                                'Geolocation: ' + geoLocation.lat + '° N, ' + geoLocation.lon + '° E<br>' +
                                 'Uhrzeit (Aufnahme): ' + dateTime + '<br>' +
                                 'Uhrzeit (Aktuell): ' + currentDateTime
                             );
 
-                            $('#processingMessage').hide(); // Verstecke die Verarbeitungsnachricht
-                            // Bild-Upload-Element ausblenden
+                            $('#processingMessage').hide();
                             $('.upload-box').hide();
-                            $('#file-input').prop('disabled', true); // Deaktiviere das Upload-Feld
-                            $('button[type="submit"]').prop('disabled', true); // Deaktiviere den Button
-                        }, 3000); // 3000 Millisekunden = 3 Sekunden
+                            $('#file-input').prop('disabled', true);
+                            $('button[type="submit"]').prop('disabled', true);
+
+                            // Zeige die Dankesnachricht an
+                            $('#thankYouMessage').show(); // Dankesnachricht anzeigen, wenn ein Bild hochgeladen wurde
+                        }, 3000);
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#responseMessage').text('Upload failed: ' + textStatus + ' - ' + errorThrown);
+                        $('#responseMessage').text('Upload fehlgeschlagen: ' + textStatus + ' - ' + errorThrown);
                     }
                 });
             });
         });
+
+        // Reset Button Funktion
+        function resetForm() {
+            $('#file-input').prop('disabled', false);
+            $('button[type="submit"]').prop('disabled', false);
+            $('.upload-box').show();
+            $('#responseMessage').empty();
+            $('#image-preview').empty();
+            $('#thankYouMessage').hide(); // Verstecke die Dankesnachricht
+            document.getElementById('imageupload').reset();
+        }
     </script>
 </body>
 </html>
