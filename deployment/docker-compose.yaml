@@ -14,3 +14,8 @@ services:
     image: hamelnhackt/backend-api:0.0.1
     ports:
       - 8000:8000
+
+  frontend:
+    image: hamelnhackt/frontend:0.0.1
+    ports:
+      - 9000:80
