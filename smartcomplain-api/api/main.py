@@ -63,7 +63,8 @@ async def create_upload_file(file: UploadFile):
     contents = await file.read()
     c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
     
-    db.save_complaint(c)
+    id = db.save_complaint(c)
+    print("Image inserted with id " + str(id))
     return ComplaintGuess(guess="test", confidence=0.5)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
@@ -81,8 +82,8 @@ def get_categories() -> List[Category]:
 
 @app.get(contextPathBase + '/category/{id}', response_model=Category)
 def get_image_as_file(id: int) -> Category:
-    im = db.get_category(id)
-    return Category(id=im[0], classes=im[1], category=im[2])
+    category = db.get_category(id)
+    return Category(id=category[0], classes=category[1], category=category[2])
 
 
 if __name__ == '__main__':
@@ -93,4 +94,4 @@ if __name__ == '__main__':
     if not db_port:
         db_port = 5432
     db.connect(db_host, db_port)
-    uvicorn.run('main:app', host="0.0.0.0", port=8001)
+    uvicorn.run('main:app', host="0.0.0.0", port=8000)
