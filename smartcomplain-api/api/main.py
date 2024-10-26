@@ -6,10 +6,14 @@ import pathlib
 import uvicorn
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
 
-from models import Info, ComplaintData, ComplaintGuess
+from models import Info, ComplaintData, ComplaintGuess, ImageData
 
+import os
 import tempfile
+
+import db_connect as db
 
 app = FastAPI(
     title='smart complaint service',
@@ -53,12 +57,26 @@ def get_info() -> List[ComplaintData]:
 async def create_upload_file(file: UploadFile):
     c = ComplaintData(description="test", image_id=1, capture_time=datetime.now())
     complaints.append(c)
-    filename = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + file.filename
-    filename = pathlib.Path(tempfile.gettempdir(), filename)
-    with open(filename, "wb") as buffer:
-        contents = await file.read()
-        buffer.write(contents)
+
+    contents = await file.read()
+    db.save_image(ImageData(image=contents, image_class="test", category="test"))
     return ComplaintGuess(guess="test", confidence=0.5)
 
+@app.get(contextPathBase + '/images', response_model=List[ImageData])
+def get_images() -> List[ImageData]:
+    result = []
+    db_images= db.get_images()
+    for image in db_images:
+        result.append(ImageData(image=image[1], image_class=image[2], category=image[3]))
+    return result
+
+@app.get(contextPathBase + '/image/{id}', response_model=bytes)
+def get_image_as_file(id: int) -> bytes:
+    im = db.get_image(id)
+    return Response(content=im[1], media_type="image/jpg")
+
 if __name__ == '__main__':
-    uvicorn.run('main:app', host="0.0.0.0", port=8000)
+    db_host = os.environ['DB_HOST']
+    db_port = os.environ['DB_PORT']    
+    db.connect(db_host, db_port)
+    uvicorn.run('main:app', host="0.0.0.0", port=8001)
