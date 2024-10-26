@@ -58,8 +58,15 @@ async def create_upload_file(file: UploadFile):
     contents = await file.read()
     c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
     db.save_complaint(c)
-    
+    add_class_with_image_to_text(9)
     return ComplaintGuess(guess="test", confidence=0.5)
+
+def add_class_with_image_to_text(imageid):
+    backend = os.environ['BACKEND_URL']
+    url = backend + contextPathBase + '/image/' + str(imageid);
+    print(url)
+    image_class = getImageClass(url)
+    print(image_class)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
 def get_image_as_file(id: int) -> bytes:

@@ -22,6 +22,7 @@ def getImageClass(image_url:str) -> str:
     print(img_classes)
 
     result = getAnswerFromLlava(model_url, image_url)
+    print(result)
     img_classes_array = img_classes.split(",")
     for img_class in img_classes_array:
         print(img_class)
