@@ -29,4 +29,3 @@ def getImageClass(image_url:str) -> str:
             print("detected")
             break
             return img_class
-}

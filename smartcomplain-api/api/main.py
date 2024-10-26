@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
 from models import Info, ComplaintData, ComplaintGuess
-#from .backend.imageToText import *
+from imageToText import *
 
 import os
 import tempfile
