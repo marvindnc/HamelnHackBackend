@@ -61,15 +61,17 @@
         <h1 class="mt-4">Mängelmelder</h1>
         <h5 class="mt-3">Fotoupload</h5>
         <p>Bitte machen Sie Fotos des vorliegenden Mangels. Bitte achten Sie darauf, dass man den Mangel gut erkennen kann und dass keine Personen auf dem Bild zu sehen sind.</p>
-        <form action="upload.php" method="post" enctype="multipart/form-data">
+        <form id="imageupload">
             <div class="upload-box" onclick="document.getElementById('file-input').click();">
                 <i class="fas fa-upload"></i>
             </div>
-            <input type="file" id="file-input" name="file" style="display: none;" accept="image/*" onchange="previewImage(event)">
+            <input type="file" id="file-input" name="imageFile" style="display: none;" accept="image/*" onchange="previewImage(event)">
+
             <div id="image-preview" style="margin-top: 10px;"></div>
             <button type="submit" class="btn btn-custom">Bild intelligent hochladen</button>
         </form>
-        <button type="submit" class="btn btn-custom" onclick="window.location.href='complainFormula.php'">Bild intelligent hochladen</button>
+
+        <p id="responseMessage"></p>
     </div>
 
     <script>
@@ -82,9 +84,30 @@
             reader.readAsDataURL(event.target.files[0]);
         }
         $( document ).ready(function() {
-            console.log( "ready!" );
-            $.get("http://localhost:8000/smartcomplaint/info", function(data) {
-                console.log(data);
+
+            $('#imageupload').on('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                console.log($('#file-input')[0])
+                var fileInput = $('#file-input')[0];
+                var file = fileInput.files[0];
+
+                var formData = new FormData();
+                formData.append('file', file);                
+
+                // Send the AJAX POST request
+                $.ajax({
+                url: 'http://localhost:8000/smartcomplaint/uploadimage/', // Replace with your server endpoint
+                type: 'POST',
+                data: formData,
+                processData: false, // Prevent jQuery from processing the data
+                contentType: false, // Prevent jQuery from setting contentType
+                success: function(response) {
+                    $('#responseMessage').text('Vermutlicher Mangel: ' + response.guess + ' mit Konfidenz: ' + response.confidence);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $('#responseMessage').text('Upload failed: ' + textStatus + ' - ' + errorThrown);
+                }
+                });
             });
         });
 
