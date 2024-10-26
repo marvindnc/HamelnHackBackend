@@ -18,7 +18,7 @@ services:
       - 8000:8000
     environment:
       DB_HOST: db
-      DB_POR: 5432
+      DB_PORT: 5432
 
   frontend:
     image: hamelnhackt/frontend:0.0.1

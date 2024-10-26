@@ -15,6 +15,7 @@ class Info(BaseModel):
     apiVersion: Optional[str] = None
 
 class ComplaintData(BaseModel):
+    id: Optional[int] = None
     description: Optional[str] = None
     capture_time: Optional[datetime] = None
     image: bytes
