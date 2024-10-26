@@ -3,6 +3,5 @@ fastapi-code-generator
 uvicorn
 python-multipart
 requests
-jproperties
 psycopg2-binary
 psycopg2
