@@ -15,6 +15,7 @@ class Info(BaseModel):
     apiVersion: Optional[str] = None
 
 class ComplaintData(BaseModel):
+    id: Optional[int] = None
     description: Optional[str] = None
     capture_time: Optional[datetime] = None
     image: bytes
@@ -24,3 +25,8 @@ class ComplaintData(BaseModel):
 class ComplaintGuess(BaseModel):
     guess: Optional[str]
     confidence: float
+
+class Category(BaseModel):
+    id: Optional[int] = None
+    classes: Optional[str] = None
+    category: Optional[str] = None
