@@ -5,6 +5,7 @@ import pathlib
 
 import uvicorn
 from fastapi import FastAPI, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from models import Info, ComplaintData, ComplaintGuess
 
@@ -15,6 +16,18 @@ app = FastAPI(
     version='0.0.1',
     description='This is an API for the smart complaint app\n',
     servers=[{'url': 'http://localhost:8080/v0'}],
+)
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 contextPathBase = "/smartcomplaint"
