@@ -106,17 +106,15 @@ def model_name(size, task):
 ALLOWED_CLASSES = {'person', 'car'}  
 
 # Funktion zum Blurren erkannter Objekte
-def blur_detected_objects(image, predictions):  
-    for detection in predictions:
-        if detection.label in ALLOWED_CLASSES:
-            # Get bounding box coordinates
-            x1, y1, x2, y2 = map(int, detection.boxes[0])
-            # Extract the region to blur
+def blur_detected_objects(image, predictions):
+    for detection in predictions[0].boxes:  # Zugriff auf das 'boxes'-Attribut
+        class_id = int(detection.cls[0])  # Extrahiere Klassen-ID
+        if class_id in [COCO_CLASSES['person'], COCO_CLASSES['car']]:  # Klasse prüfen
+            # Bounding Box-Koordinaten abrufen und in Integer konvertieren
+            x1, y1, x2, y2 = map(int, detection.xyxy[0])
             roi = image[y1:y2, x1:x2]
-            # Apply a Gaussian blur to this region
-            blurred_roi = cv2.GaussianBlur(roi, (99, 99), 30)
-            # Replace the original ROI with the blurred ROI
-            image[y1:y2, x1:x2] = blurred_roi
+            blurred_roi = cv2.GaussianBlur(roi, (99, 99), 99)  # Gaussian-Blur anwenden
+            image[y1:y2, x1:x2] = blurred_roi  # Ersetze Originalbereich mit Blur
     return image
 
 
@@ -136,10 +134,38 @@ def do_inferencing(source, model_size, class_list):
     # instanciate yolo model
     model = YOLO(model_name(model_size, task="detect"))
     image = cv2.imread(source)
-    prediction = model.predict(image, verbose=False, tracker='bytetrack.yaml')
-    res_plotted = prediction[0].plot()
+    predictions = model.predict(image, verbose=False, tracker='bytetrack.yaml')
+    
+    predictions_output = ""
+    
+    # Ausgabe der Vorhersagen in der Konsole
+    for i, prediction in enumerate(predictions):
+        logger.info(f"Prediction {i + 1}:")
+        for box in prediction.boxes:
+            class_id = int(box.cls[0])
+            class_name = list(COCO_CLASSES.keys())[list(COCO_CLASSES.values()).index(class_id)]
+            confidence = box.conf[0]
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+            # Füge die Details zur predictions_output-Variablen hinzu
+            predictions_output += (f"Klasse: {class_name} (ID: {class_id}), "
+                                   f"Konfidenz: {confidence:.2f}\n")
+            #predictions_output += f"    Bounding Box: ({x1}, {y1}), ({x2}, {y2})\n"
+
+    # Optionale Ausgabe der gesammelten Vorhersagen
+    logger.info(predictions_output)  # Logge die Vorhersagen, wenn gewünscht
+    # print(predictions_output)  # Falls du die Vorhersagen auf der Konsole sehen willst
+
+    res_plotted = predictions[0].plot()
     cv2.imwrite("inferenced.jpg", res_plotted)
-    #cv2.imwrite("infreenced_blured.jpg", blur_detected_objects(image, prediction))
+
+    # Blurring erkannter Objekte
+    blurred_image = blur_detected_objects(image, predictions)
+
+    # Speichere das Ergebnisbild
+    cv2.imwrite("inferenced_blurred.jpg", blurred_image)
+    
+    logger.info("Inferenz und Blurring abgeschlossen.")
 
     # be nice to your operating system
     cap.release()
