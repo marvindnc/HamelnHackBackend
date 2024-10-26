@@ -1,8 +1,8 @@
 FROM python:3.11
 
-COPY api /app/api
+COPY src /app/src
 COPY ./requirements.txt /app/
 RUN apt update && apt upgrade -y && apt install gcc -y
 RUN pip install -r /app/requirements.txt
 
-CMD ["python3", "/app/api/main.py"]
+CMD ["python3", "/app/main.py"]
