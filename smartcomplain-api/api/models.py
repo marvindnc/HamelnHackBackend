@@ -25,3 +25,8 @@ class ComplaintData(BaseModel):
 class ComplaintGuess(BaseModel):
     guess: Optional[str]
     confidence: float
+
+class Category(BaseModel):
+    id: Optional[int] = None
+    classes: Optional[str] = None
+    category: Optional[str] = None

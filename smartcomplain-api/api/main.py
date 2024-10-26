@@ -8,7 +8,7 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
-from models import Info, ComplaintData, ComplaintGuess
+from models import Info, ComplaintData, ComplaintGuess, Category
 
 import os
 import tempfile
@@ -45,11 +45,17 @@ def get_info() -> Info:
     return info
 
 @app.get(contextPathBase + '/complaint', response_model=List[ComplaintData])
-def get_info() -> List[ComplaintData]:
+def get_complaints() -> List[ComplaintData]:
     result = []
     complaints = db.get_complaints()
     for complaint in complaints:
         result.append(ComplaintData(id=complaint[0], image=b'', image_class=complaint[2], category=complaint[3], description=complaint[4],  capture_time=complaint[5]))
+    return result
+
+@app.get(contextPathBase + '/complaint/{id}', response_model=List[ComplaintData])
+def get_complaint() -> List[ComplaintData]:
+    complaint = db.get_complaint(id)
+    result = ComplaintData(id=complaint[0], image=b'', image_class=complaint[2], category=complaint[3], description=complaint[4],  capture_time=complaint[5])
     return result
 
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
@@ -65,8 +71,26 @@ def get_image_as_file(id: int) -> bytes:
     im = db.get_image(id)
     return Response(content=im[0], media_type="image/jpg")
 
+@app.get(contextPathBase + '/category', response_model=List[Category])
+def get_categories() -> List[Category]:
+    result = []
+    categories = db.get_categories()
+    for category in categories:
+        result.append(Category(id=category[0], classes=category[1], category=category[2]))
+    return result
+
+@app.get(contextPathBase + '/category/{id}', response_model=Category)
+def get_image_as_file(id: int) -> Category:
+    im = db.get_category(id)
+    return Category(id=im[0], classes=im[1], category=im[2])
+
+
 if __name__ == '__main__':
     db_host = os.environ['DB_HOST']
+    if not db_host:
+        db_host = "db"
     db_port = os.environ['DB_PORT']    
+    if not db_port:
+        db_port = 5432
     db.connect(db_host, db_port)
-    uvicorn.run('main:app', host="0.0.0.0", port=8000)
+    uvicorn.run('main:app', host="0.0.0.0", port=8001)
