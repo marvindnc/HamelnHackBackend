@@ -50,7 +50,7 @@ def get_info() -> List[ComplaintData]:
     result = []
     complaints = db.get_complaints()
     for complaint in complaints:
-        result.append(ComplaintData(description=complaint[1], capture_time=complaint[2], image=complaint[3], image_class=complaint[4], category=complaint[5]))
+        result.append(ComplaintData(id=complaint[0], image=b'', image_class=complaint[2], category=complaint[3], description=complaint[4],  capture_time=complaint[5]))
     return result
 
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
@@ -71,4 +71,4 @@ if __name__ == '__main__':
     db_host = os.environ['DB_HOST']
     db_port = os.environ['DB_PORT']    
     db.connect(db_host, db_port)
-    uvicorn.run('main:app', host="0.0.0.0", port=8001)
+    uvicorn.run('main:app', host="0.0.0.0", port=8000)
