@@ -38,7 +38,8 @@ def get_info() -> List[ComplaintData]:
 
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
 async def create_upload_file(file: UploadFile):
-    print(file)
+    c = ComplaintData(description="test", image_id=1, capture_time=datetime.now())
+    complaints.append(c)
     filename = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + file.filename
     filename = pathlib.Path(tempfile.gettempdir(), filename)
     with open(filename, "wb") as buffer:
