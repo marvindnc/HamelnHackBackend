@@ -10,6 +10,7 @@ model_url = configs.get("model").data
 categories = configs.get("classes").data
 print(categories)
 
+#get image from database
 
 result = getAnswerFromLlava(model_url, "https://sensoneo.com/wp-content/uploads/2023/02/global-waste-index-2022-1024x536-1.png")
 
