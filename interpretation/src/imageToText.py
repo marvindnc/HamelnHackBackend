@@ -9,8 +9,9 @@ def getAnswerFromLlava(url: str, image: str) -> str:
     }
     response = requests.post(url, json=json_data)
     data = response.json()['response']
+    print(data)
     return data
 
-def contains_word(s, w):
-    return (' ' + w + ' ') in (' ' + s + ' ')
+def contains_word(text, word):
+    return (' ' + word.lower() + ' ') in text.lower()
 
