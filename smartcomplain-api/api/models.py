@@ -16,7 +16,11 @@ class Info(BaseModel):
     apiVersion: Optional[str] = None
 
 
-class Complaint(BaseModel):
+class ComplaintData(BaseModel):
     description: Optional[str] = None
     image_id: Optional[int] = None
     capture_time: Optional[datetime] = None
+
+class ComplaintGuess(BaseModel):
+    guess: Optional[str]
+    confidence: float

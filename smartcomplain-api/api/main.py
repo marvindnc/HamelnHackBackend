@@ -6,7 +6,7 @@ import pathlib
 import uvicorn
 from fastapi import FastAPI, UploadFile
 
-from models import Info, Complaint
+from models import Info, ComplaintData, ComplaintGuess
 
 import tempfile
 
@@ -32,17 +32,19 @@ def get_info() -> Info:
     info.apiVersion = "0.0.1"
     return info
 
-@app.get(contextPathBase + '/complaint', response_model=List[Complaint])
-def get_info() -> List[Complaint]:
+@app.get(contextPathBase + '/complaint', response_model=List[ComplaintData])
+def get_info() -> List[ComplaintData]:
     return complaints
 
-@app.post("/uploadfile/")
+@app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
 async def create_upload_file(file: UploadFile):
+    print(file)
     filename = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + file.filename
+    filename = pathlib.Path(tempfile.gettempdir(), filename)
     with open(filename, "wb") as buffer:
         contents = await file.read()
         buffer.write(contents)
-    return {"filename": file.filename}
+    return ComplaintGuess(guess="test", confidence=0.5)
 
 if __name__ == '__main__':
     uvicorn.run('main:app', host="0.0.0.0", port=8000)
