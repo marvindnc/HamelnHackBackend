@@ -1,0 +1,54 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+.navbar {
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+.navbar-brand {
+    font-weight: bold;
+}
+.navbar-toggler {
+    border: none;
+}
+.container {
+    margin-top: 20px;
+}
+.table-container {
+    margin-top: 20px;
+}
+.table th, .table td {
+    vertical-align: middle;
+}
+.table img {
+    max-width: 100px;
+    max-height: 100px;
+}
+.upload-box {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    margin-bottom: 20px;
+}
+.upload-box i {
+    font-size: 24px;
+    color: #a0a0a0;
+}
+.btn-custom {
+    border: 1px solid #8bc34a;
+    color: #8bc34a;
+    background-color: #fff;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+}
+.processing-message {
+    display: none; /* Versteckt die Verarbeitungsnachricht initial */
+    font-weight: bold;
+    margin-top: 10px;
+}

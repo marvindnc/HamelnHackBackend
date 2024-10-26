@@ -16,14 +16,29 @@ def get_complaints():
 
 def save_complaint(complaint):
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO complaints (description, capture_time, image, image_class, category) VALUES (%s, %s, %s, %s, %s)", 
+    cursor.execute("INSERT INTO complaints (description, capture_time, image, image_class, category) VALUES (%s, %s, %s, %s, %s) RETURNING id", 
                    (complaint.description, complaint.capture_time, psycopg2.Binary(complaint.image), complaint.image_class, complaint.category))
+    id = cursor.fetchone()[0]
     conn.commit()
+    return id
+    
+
+def get_complaint(id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM complaints WHERE id = %s", (id, ))
+    result = cursor.fetchone()
+    return result
 
 def get_categories():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM categories")
     result = cursor.fetchall()
+    return result
+
+def get_category(id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM categories WHERE id = %s", (id,))
+    result = cursor.fetchone()
     return result
 
 def get_image(id):
