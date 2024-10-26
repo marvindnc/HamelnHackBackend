@@ -8,7 +8,7 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
-from models import Info, ComplaintData, ComplaintGuess, ImageData
+from models import Info, ComplaintData, ComplaintGuess
 
 import os
 import tempfile
@@ -36,11 +36,6 @@ app.add_middleware(
 
 contextPathBase = "/smartcomplaint"
 
-complaints = []
-
-# for Docker paths
-baseImagePath = pathlib.Path(__file__).parent.resolve()
-
 @app.get(contextPathBase + '/info', response_model=Info)
 def get_info() -> Info:
     info = Info()
@@ -51,29 +46,24 @@ def get_info() -> Info:
 
 @app.get(contextPathBase + '/complaint', response_model=List[ComplaintData])
 def get_info() -> List[ComplaintData]:
-    return complaints
+    result = []
+    complaints = db.get_complaints()
+    for complaint in complaints:
+        result.append(ComplaintData(description=complaint[1], capture_time=complaint[2], image=complaint[3], image_class=complaint[4], category=complaint[5]))
+    return result
 
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
 async def create_upload_file(file: UploadFile):
-    c = ComplaintData(description="test", image_id=1, capture_time=datetime.now())
-    complaints.append(c)
-
     contents = await file.read()
-    db.save_image(ImageData(image=contents, image_class="test", category="test"))
+    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
+    
+    db.save_complaint(c)
     return ComplaintGuess(guess="test", confidence=0.5)
-
-@app.get(contextPathBase + '/images', response_model=List[ImageData])
-def get_images() -> List[ImageData]:
-    result = []
-    db_images= db.get_images()
-    for image in db_images:
-        result.append(ImageData(image=image[1], image_class=image[2], category=image[3]))
-    return result
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
 def get_image_as_file(id: int) -> bytes:
     im = db.get_image(id)
-    return Response(content=im[1], media_type="image/jpg")
+    return Response(content=im[0], media_type="image/jpg")
 
 if __name__ == '__main__':
     db_host = os.environ['DB_HOST']

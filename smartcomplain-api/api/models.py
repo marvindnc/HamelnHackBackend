@@ -14,17 +14,13 @@ class Info(BaseModel):
     systemDescription: Optional[str] = None
     apiVersion: Optional[str] = None
 
-
 class ComplaintData(BaseModel):
     description: Optional[str] = None
-    image_location: Optional[str] = None
     capture_time: Optional[datetime] = None
+    image: bytes
+    image_class: Optional[str] = None
+    category: Optional[int] = None    
 
 class ComplaintGuess(BaseModel):
     guess: Optional[str]
     confidence: float
-
-class ImageData(BaseModel):
-    image: bytes
-    image_class: Optional[str] = None
-    category: Optional[str] = None
