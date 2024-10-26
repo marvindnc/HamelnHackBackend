@@ -9,7 +9,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-
 class Info(BaseModel):
     generation_date: Optional[datetime] = Field(None, alias='generation-date')
     systemDescription: Optional[str] = None
@@ -18,9 +17,14 @@ class Info(BaseModel):
 
 class ComplaintData(BaseModel):
     description: Optional[str] = None
-    image_id: Optional[int] = None
+    image_location: Optional[str] = None
     capture_time: Optional[datetime] = None
 
 class ComplaintGuess(BaseModel):
     guess: Optional[str]
     confidence: float
+
+class ImageData(BaseModel):
+    image: bytes
+    image_class: Optional[str] = None
+    category: Optional[str] = None
