@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:latest
     ports:
-      - 5432:5432
+      - 15432:5432
     volumes:
       - ./volumes:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
@@ -16,6 +16,9 @@ services:
     image: hamelnhackt/backend-api:0.0.1
     ports:
       - 8000:8000
+    environment:
+      DB_HOST: db
+      DB_POR: 5432
 
   frontend:
     image: hamelnhackt/frontend:0.0.1

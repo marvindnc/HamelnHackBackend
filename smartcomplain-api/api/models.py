@@ -23,3 +23,8 @@ class ComplaintData(BaseModel):
 class ComplaintGuess(BaseModel):
     guess: Optional[str]
     confidence: float
+
+class ImageData(BaseModel):
+    image: bytes
+    image_class: Optional[str] = None
+    category: Optional[str] = None
