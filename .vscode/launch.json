@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "DB_HOST": "localhost",
+                "DB_PORT": "15432",
+                "BACKEND_URL": "http://localhost:8000",
+                "LLM_MODEL": "http://localhost:11434/api/generate",
+                "IMG_CLASSES": "tree, trees, street, road, playground, water"
+            },
+        }
+    ]
+}
