@@ -30,3 +30,13 @@ INSERT INTO categories (category, classes) VALUES ('Spielplatz', 'sports ball');
 
 INSERT INTO categories (category, classes) VALUES ('Verkehr und Straßeninfrastruktur', 'person');
 INSERT INTO categories (category, classes) VALUES ('Verkehr und Straßeninfrastruktur', 'car');
+
+INSERT INTO categories (category, classes) VALUES ('Bürgeranliegen', 'laptop');
+INSERT INTO categories (category, classes) VALUES ('Bürgeranliegen', 'remote control');
+INSERT INTO categories (category, classes) VALUES ('Bürgeranliegen', 'keyboard');
+INSERT INTO categories (category, classes) VALUES ('Bürgeranliegen', 'cell phone');
+
+INSERT INTO categories (category, classes) VALUES ('Öffentliche Anlagen', 'bench');
+INSERT INTO categories (category, classes) VALUES ('Öffentliche Anlagen', 'chair');
+INSERT INTO categories (category, classes) VALUES ('Öffentliche Anlagen', 'couch');
+INSERT INTO categories (category, classes) VALUES ('Öffentliche Anlagen', 'dining table');

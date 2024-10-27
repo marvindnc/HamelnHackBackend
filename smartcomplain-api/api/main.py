@@ -68,7 +68,7 @@ async def create_upload_file(file: UploadFile):
     return ComplaintGuess(guess="test", confidence=0.5)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
-def get_image_as_file(id: int) -> bytes:
+def get_category_by_id(id: int) -> bytes:
     im = db.get_image(id)
     return Response(content=im[0], media_type="image/jpg")
 
@@ -81,15 +81,14 @@ def get_categories() -> List[Category]:
     return result
 
 @app.get(contextPathBase + '/category/{id}', response_model=Category)
-def get_image_as_file(id: int) -> Category:
+def get_category_by_id(id: int) -> Category:
     category = db.get_category(id)
     return Category(id=category[0], classes=category[1], category=category[2])
 
-@app.get(contextPathBase + '/category/class/{id}', response_model=List[Category])
-def get_categories() -> List[Category]:
+@app.get(contextPathBase + '/category/class/{name}', response_model=List[Category])
+def get_categories(name: str) -> List[Category]:
     result = []
-    categories = db.get_category_by_class(id)
-    print(categories)
+    categories = db.get_category_by_class(name)
     for category in categories:
         result.append(Category(id=category[0], classes=category[1], category=category[2]))
     return result

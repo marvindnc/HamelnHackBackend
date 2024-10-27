@@ -42,10 +42,13 @@ def get_category(id):
 
 def get_category_by_class(image_class):
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM categories WHERE classes = %s", (image_class,))
-    print(cursor.query)
+    cursor.execute("SELECT * FROM categories")
     result = cursor.fetchall()
-    return result
+    function_result = []
+    for row in result:
+        if image_class == row[1]:
+            function_result.append(row)
+    return function_result
 
 def get_image(id):
     cursor = conn.cursor()
