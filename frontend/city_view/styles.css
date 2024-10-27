@@ -1,54 +1,79 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    background-color: #f1f3f5;
+    color: #333;
 }
+
 .navbar {
-    background-color: #fff;
-    border-bottom: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 15px 20px;
 }
+
 .navbar-brand {
-    font-weight: bold;
+    display: flex;
+    align-items: center;
+    margin-right: auto;
 }
+
+.navbar-text {
+    font-weight: bold;
+    font-size: 20px;
+    color: #0056b3;
+}
+
+.navbar-image {
+    width: 50px;
+    height: auto;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+
 .navbar-toggler {
     border: none;
+    outline: none;
 }
+
 .container {
-    margin-top: 20px;
+    margin-top: 30px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 .table-container {
     margin-top: 20px;
 }
-.table th, .table td {
-    vertical-align: middle;
+
+.table {
+    margin-top: 20px;
 }
+
+.table thead th {
+    background-color: #0056b3;
+    color: white;
+    font-weight: bold;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    padding: 10px;
+}
+
 .table img {
     max-width: 100px;
     max-height: 100px;
+    border-radius: 5px;
 }
-.upload-box {
-    width: 100px;
-    height: 100px;
-    border: 1px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f0f0f0;
+
+h1 {
+    font-size: 26px;
+    color: #0056b3;
     margin-bottom: 20px;
+    text-align: center;
 }
-.upload-box i {
-    font-size: 24px;
-    color: #a0a0a0;
-}
-.btn-custom {
-    border: 1px solid #8bc34a;
-    color: #8bc34a;
-    background-color: #fff;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-}
-.processing-message {
-    display: none; /* Versteckt die Verarbeitungsnachricht initial */
-    font-weight: bold;
-    margin-top: 10px;
+
+.shadow-sm {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
