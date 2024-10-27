@@ -12,15 +12,24 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: smartcomplaints
 
-  api:
-    image: hamelnhackt/backend-api:0.0.1
-    ports:
-      - 8000:8000
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
+  # api:
+  #   image: hamelnhackt/backend-api:0.0.1
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     DB_HOST: db
+  #     DB_PORT: 5432
 
   frontend:
     image: hamelnhackt/frontend:0.0.1
     ports:
       - 9000:80
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"

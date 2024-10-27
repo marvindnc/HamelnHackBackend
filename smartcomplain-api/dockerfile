@@ -1,6 +1,7 @@
 FROM python:3.12
 
 COPY api /app/api
+COPY backend /app/backend
 COPY ./requirements.txt /app/
 RUN apt update && apt upgrade -y && apt install gcc -y
 RUN pip install -r /app/requirements.txt

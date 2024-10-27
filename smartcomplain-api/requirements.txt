@@ -1,7 +1,15 @@
 fastapi
 fastapi-code-generator
 uvicorn
+requests
 python-multipart==0.0.12
-
 psycopg2-binary
 psycopg2
+opencv-python
+ultralytics
+torch
+cuda-python
+torchvision 
+torchaudio
+ipykernel
+python-ffmpeg

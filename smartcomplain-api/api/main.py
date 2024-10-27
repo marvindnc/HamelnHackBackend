@@ -8,7 +8,9 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
+from imageToText import *
 from models import Info, ComplaintData, ComplaintGuess, Category
+from object_detection import *
 
 import os
 import tempfile
@@ -61,11 +63,23 @@ def get_complaint() -> List[ComplaintData]:
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
 async def create_upload_file(file: UploadFile):
     contents = await file.read()
-    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
     
+    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
+   
     id = db.save_complaint(c)
     print("Image inserted with id " + str(id))
+    #add_class_with_image_to_text(id)
+    db.save_complaint(c)
+    
     return ComplaintGuess(guess="test", confidence=0.5)
+
+def add_class_with_image_to_text(imageid):
+    backend = os.environ['BACKEND_URL']
+    url = backend + contextPathBase + '/image/' + str(imageid);
+    print(url)
+    image_class = start_detection(url)
+    #image_class = getImageClass(url)
+    print(image_class)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
 def get_category_by_id(id: int) -> bytes:
@@ -94,6 +108,7 @@ def get_categories(name: str) -> List[Category]:
     return result
 
 if __name__ == '__main__':
+    #getImageClass("https://sensoneo.com/wp-content/uploads/2023/02/global-waste-index-2022-1024x536-1.png")
     db_host = os.environ['DB_HOST']
     if not db_host:
         db_host = "db"
