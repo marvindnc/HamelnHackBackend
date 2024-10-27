@@ -63,8 +63,8 @@ def get_complaint() -> List[ComplaintData]:
 @app.post(contextPathBase + '/uploadimage/', response_model=ComplaintGuess)
 async def create_upload_file(file: UploadFile):
     contents = await file.read()
-    img_class = start_detection(contents)
-    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class=img_class, category=0)
+    
+    c = ComplaintData(description="test", capture_time=datetime.now(), image=contents, image_class="", category=0)
    
     id = db.save_complaint(c)
     print("Image inserted with id " + str(id))
@@ -77,7 +77,8 @@ def add_class_with_image_to_text(imageid):
     backend = os.environ['BACKEND_URL']
     url = backend + contextPathBase + '/image/' + str(imageid);
     print(url)
-    image_class = getImageClass(url)
+    image_class = start_detection(url)
+    #image_class = getImageClass(url)
     print(image_class)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)

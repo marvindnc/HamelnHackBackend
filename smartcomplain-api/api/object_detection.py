@@ -7,6 +7,11 @@ import os
 import signal
 import cv2
 from ultralytics import YOLO
+
+# Zum Image herunterladen
+import requests
+import numpy as np
+
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger()
 running = True
@@ -120,6 +125,8 @@ def blur_detected_objects(image, predictions):
 
 def do_inferencing(source, model_size, class_list):
     global running
+
+    """
     # use USB camera
     if source.isdigit():
         source = int(source)
@@ -137,44 +144,109 @@ def do_inferencing(source, model_size, class_list):
     model = YOLO(model_name(model_size, task="detect"))
     image = cv2.imread(source)
     predictions = model.predict(image, verbose=False, tracker='bytetrack.yaml')
+    """
     
-    predictions_output = ""
-    
-    # Schreiben der Vorhersage in die Variable predictions_output
-    for i, prediction in enumerate(predictions):
-        logger.info(f"Prediction {i + 1}:")
-        for box in prediction.boxes:
-            class_id = int(box.cls[0])
-            class_name = list(COCO_CLASSES.keys())[list(COCO_CLASSES.values()).index(class_id)]
-            confidence = box.conf[0]
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
+#-------------------------
+    # Überprüfen, ob die Quelle eine Zahl ist (z.B. eine USB-Kamera)
+    if source.isdigit():
+        source = int(source)
+        cap = cv2.VideoCapture(source)
 
-            # Füge die Details zur predictions_output-Variablen hinzu
-            predictions_output += (f"Klasse: {class_name} (ID: {class_id}), "
-                                   f"Konfidenz: {confidence:.2f}\n")
-            #predictions_output += f"    Bounding Box: ({x1}, {y1}), ({x2}, {y2})\n"
+        # Details aus der Videoquelle abrufen
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
-    # Optionale Ausgabe der gesammelten Vorhersagen
-    logger.info(predictions_output)  # Logge die Vorhersagen
-    
-    # Plot für das 1. image
-    res_plotted = predictions[0].plot()
-    cv2.imwrite("inferenced.jpg", res_plotted)
+    else:
+        # Bild von der URL herunterladen
+        response = requests.get(source)
+        
+        # Überprüfen, ob der Download erfolgreich war
+        if response.status_code == 200:
+            # Bilddaten in ein Numpy-Array umwandeln
+            image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+            # Bild mit OpenCV dekodieren
+            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+            width, height = image.shape[1], image.shape[0]
+            fps = None  # FPS ist nicht relevant für ein einzelnes Bild
+            frame_count = 1  # Es gibt nur ein Bild
+        else:
+            print(f"Fehler beim Herunterladen des Bildes: {response.status_code}")
+            return
 
-    # Blurring erkannter Objekte
-    blurred_image = blur_detected_objects(image, predictions)
+    logger.info("start inferencing")
 
-    # Speichere das Ergebnisbild
-    cv2.imwrite("inferenced_blurred.jpg", blurred_image)
-    
-    logger.info("Inferenz und Blurring abgeschlossen.")
+    # YOLO-Modell instanziieren
+    model = YOLO(model_name(model_size, task="detect"))
 
-    # be nice to your operating system
-    cap.release()
-    cv2.destroyAllWindows()
-    logger.info("Stopped inferencing")
+    # Wenn es sich um eine Videoquelle handelt, lesen Sie die Frames
+    if isinstance(cap, cv2.VideoCapture):
+        while running:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            predictions = model.predict(frame, verbose=False, tracker='bytetrack.yaml')
+            # Hier können Sie die Vorhersagen verarbeiten
+            return start_prediction
+    else:
+        # Vorhersage für das heruntergeladene Bild
+        predictions = model.predict(image, verbose=False, tracker='bytetrack.yaml')
+        # Hier können Sie die Vorhersagen verarbeiten
+        return start_prediction
 
-    return predictions_output[0]
+#------------------------
+    # Funktion start_prediction wurde neu hinzugefuegt
+    def start_prediction():
+        
+        #predictions_output = ""
+        predictions_output = []
+        # Schreiben der Vorhersage in die Variable predictions_output
+        for i, prediction in enumerate(predictions):
+            logger.info(f"Prediction {i + 1}:")
+            for box in prediction.boxes:
+                class_id = int(box.cls[0])
+                class_name = list(COCO_CLASSES.keys())[list(COCO_CLASSES.values()).index(class_id)]
+                confidence = box.conf[0]
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+                """
+                # Füge die Details zur predictions_output-Variablen hinzu
+                predictions_output += (f"Klasse: {class_name} (ID: {class_id}), "
+                                    f"Konfidenz: {confidence:.2f}\n")
+                #predictions_output += f"    Bounding Box: ({x1}, {y1}), ({x2}, {y2})\n"
+                """
+                # Füge die Details als Dictionary zur predictions_output-Variablen hinzu
+                predictions_output.append({
+                    "Klasse": class_name,
+                    "ID": class_id,
+                    "Konfidenz": round(confidence, 2),
+                    "Bounding Box": {"x1": x1, "y1": y1, "x2": x2, "y2": y2}
+                })
+
+        # Optionale Ausgabe der gesammelten Vorhersagen
+        logger.info(predictions_output)  # Logge die Vorhersagen
+        
+        # Plot für das 1. image
+        res_plotted = predictions[0].plot()
+        cv2.imwrite("inferenced.jpg", res_plotted)
+
+        # Blurring erkannter Objekte
+        blurred_image = blur_detected_objects(image, predictions)
+
+        # Speichere das Ergebnisbild
+        cv2.imwrite("inferenced_blurred.jpg", blurred_image)
+        
+        logger.info("Inferenz und Blurring abgeschlossen.")
+
+        # be nice to your operating system
+        cap.release()
+        cv2.destroyAllWindows()
+        logger.info("Stopped inferencing")
+
+        #TODO Zugriff über [0] nicht möglich. Muss angepasst werden!
+        # ggf. geloest mit predictions_output als dictionary
+        return predictions_output[0]
 
 def start_detection(image):
     do_inferencing(image, 'n', COCO_CLASSES)
