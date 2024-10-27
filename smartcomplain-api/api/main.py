@@ -68,7 +68,7 @@ async def create_upload_file(file: UploadFile):
    
     id = db.save_complaint(c)
     print("Image inserted with id " + str(id))
-    #add_class_with_image_to_text(id)
+    #add_class_with_image_to_text(id) # Auskommentiert fuer demo
     db.save_complaint(c)
     
     return ComplaintGuess(guess="test", confidence=0.5)
@@ -77,7 +77,7 @@ def add_class_with_image_to_text(imageid):
     backend = os.environ['BACKEND_URL']
     url = backend + contextPathBase + '/image/' + str(imageid);
     print(url)
-    image_class = start_detection(url)
+    image_class = start_detection(url, imageid)
     #image_class = getImageClass(url)
     print(image_class)
 

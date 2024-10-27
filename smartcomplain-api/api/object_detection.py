@@ -12,6 +12,8 @@ from ultralytics import YOLO
 import requests
 import numpy as np
 
+import db_connect as db
+
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger()
 running = True
@@ -123,7 +125,7 @@ def blur_detected_objects(image, predictions):
     return image
 
 
-def do_inferencing(source, model_size, class_list):
+def do_inferencing(source, model_size, class_list, imageid):
     global running
 
     """
@@ -160,20 +162,25 @@ def do_inferencing(source, model_size, class_list):
 
     else:
         # Bild von der URL herunterladen
-        response = requests.get(source)
-        
+        print("try to download image")
+        image_from_db = db.get_image(imageid)
+        print(image_from_db)
+        #response = requests.get(source)
+        image_array = np.frombuffer(image_from_db[0], dtype=np.uint16)
+        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
         # Überprüfen, ob der Download erfolgreich war
-        if response.status_code == 200:
-            # Bilddaten in ein Numpy-Array umwandeln
-            image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
-            # Bild mit OpenCV dekodieren
-            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-            width, height = image.shape[1], image.shape[0]
-            fps = None  # FPS ist nicht relevant für ein einzelnes Bild
-            frame_count = 1  # Es gibt nur ein Bild
-        else:
-            print(f"Fehler beim Herunterladen des Bildes: {response.status_code}")
-            return
+        # if response.status_code == 200:
+        #     # Bilddaten in ein Numpy-Array umwandeln
+        #     image_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+        #     # Bild mit OpenCV dekodieren
+        #     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        #     width, height = image.shape[1], image.shape[0]
+        #     fps = None  # FPS ist nicht relevant für ein einzelnes Bild
+        #     frame_count = 1  # Es gibt nur ein Bild
+        # else:
+        #     print(f"Fehler beim Herunterladen des Bildes: {response.status_code}")
+        #     return
 
     logger.info("start inferencing")
     print("start inferencing")
@@ -181,20 +188,12 @@ def do_inferencing(source, model_size, class_list):
     # YOLO-Modell instanziieren
     model = YOLO(model_name(model_size, task="detect"))
 
-    # Wenn es sich um eine Videoquelle handelt, lesen Sie die Frames
-    if isinstance(cap, cv2.VideoCapture):
-        while running:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            predictions = model.predict(frame, verbose=False, tracker='bytetrack.yaml')
-            # Hier können Sie die Vorhersagen verarbeiten
-            return start_prediction
-    else:
-        # Vorhersage für das heruntergeladene Bild
-        predictions = model.predict(image, verbose=False, tracker='bytetrack.yaml')
-        # Hier können Sie die Vorhersagen verarbeiten
-        return start_prediction
+    # Vorhersage für das heruntergeladene Bild
+    print("start model inference")
+    predictions = model.predict(image, verbose=False, tracker='bytetrack.yaml')
+    print(predictions)
+    # Hier können Sie die Vorhersagen verarbeiten
+    start_prediction
 
 #------------------------
     # Funktion start_prediction wurde neu hinzugefuegt
@@ -250,8 +249,8 @@ def do_inferencing(source, model_size, class_list):
         # ggf. geloest mit predictions_output als dictionary
         return predictions_output[0]
 
-def start_detection(image):
-    do_inferencing(image, 'n', COCO_CLASSES)
+def start_detection(image, imageid):
+    do_inferencing(image, 'n', COCO_CLASSES, imageid=imageid)
 
 # if __name__ == '__main__':
 #     arg_parser = argparse.ArgumentParser()
