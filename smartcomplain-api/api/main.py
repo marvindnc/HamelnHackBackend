@@ -82,7 +82,7 @@ def add_class_with_image_to_text(imageid):
     print(image_class)
 
 @app.get(contextPathBase + '/image/{id}', response_model=bytes)
-def get_image_as_file(id: int) -> bytes:
+def get_category_by_id(id: int) -> bytes:
     im = db.get_image(id)
     return Response(content=im[0], media_type="image/jpg")
 
@@ -95,10 +95,17 @@ def get_categories() -> List[Category]:
     return result
 
 @app.get(contextPathBase + '/category/{id}', response_model=Category)
-def get_image_as_file(id: int) -> Category:
+def get_category_by_id(id: int) -> Category:
     category = db.get_category(id)
     return Category(id=category[0], classes=category[1], category=category[2])
 
+@app.get(contextPathBase + '/category/class/{name}', response_model=List[Category])
+def get_categories(name: str) -> List[Category]:
+    result = []
+    categories = db.get_category_by_class(name)
+    for category in categories:
+        result.append(Category(id=category[0], classes=category[1], category=category[2]))
+    return result
 
 if __name__ == '__main__':
     #getImageClass("https://sensoneo.com/wp-content/uploads/2023/02/global-waste-index-2022-1024x536-1.png")

@@ -22,10 +22,9 @@ def save_complaint(complaint):
     conn.commit()
     return id
     
-
 def get_complaint(id):
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM complaints WHERE id = %s", (id, ))
+    cursor.execute("SELECT * FROM complaints WHERE id = %s", (int(id), ))
     result = cursor.fetchone()
     return result
 
@@ -40,6 +39,16 @@ def get_category(id):
     cursor.execute("SELECT * FROM categories WHERE id = %s", (id,))
     result = cursor.fetchone()
     return result
+
+def get_category_by_class(image_class):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM categories")
+    result = cursor.fetchall()
+    function_result = []
+    for row in result:
+        if image_class == row[1]:
+            function_result.append(row)
+    return function_result
 
 def get_image(id):
     cursor = conn.cursor()

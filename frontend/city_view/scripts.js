@@ -1,57 +1,33 @@
-//TODO: 
-// 1. Fetch complaints from the backend
-// 2. Display complaints in the table
-
-function fetchComplaints() {
-    fetch('http://localhost:3000/complaints')
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            //displayComplaints(data);
-        });
-}
-
-// Fake function to generate complaint data
-function generateFakeComplaints() {
-    return [
-        {
-            id: 1,
-            time: '2023-10-01 14:30',
-            class: 'Straßenschaden',
-            category: 'Infrastruktur',
-            image: 'https://via.placeholder.com/100'
-        },
-        {
-            id: 2,
-            time: '2023-10-02 09:15',
-            class: 'Verschmutzung',
-            category: 'Umwelt',
-            image: 'https://via.placeholder.com/100'
-        },
-        {
-            id: 3,
-            time: '2023-10-03 16:45',
-            class: 'Lärmbelästigung',
-            category: 'Lärm',
-            image: 'https://via.placeholder.com/100'
-        }
-    ];
-}
+// TODO:
+// 1. Complaints anzeigen
+// 2. Bilder anzeigen
 
 $(document).ready(function() {
     fetchComplaints();
-
-    var complaints = generateFakeComplaints();
-    var tableBody = $('#complaintTableBody');
-
-    complaints.forEach(function(complaint) {
-        var row = '<tr>' +
-            '<td>' + complaint.id + '</td>' +
-            '<td>' + complaint.time + '</td>' +
-            '<td>' + complaint.class + '</td>' +
-            '<td>' + complaint.category + '</td>' +
-            '<td><img src="' + complaint.image + '" alt="Complaint Image"></td>' +
-            '</tr>';
-        tableBody.append(row);
-    });
 });
+
+function fetchComplaints() {
+    $.ajax({
+        url: 'http://localhost:8000/smartcomplaint/complaint', // Verwende den korrekten API-Endpunkt
+        method: 'GET',
+        success: function(data) {
+            var tableBody = $('#complaintTableBody');
+            tableBody.empty(); // Clear existing rows
+
+            data.forEach(function(complaint) {
+                var imageUrl = 'http://localhost:8000/smartcomplaint/image/' + complaint.id;
+                var row = '<tr>' +
+                    '<td>' + complaint.id + '</td>' +
+                    '<td>' + complaint.capture_time + '</td>' +
+                    '<td>' + complaint.image_class + '</td>' +
+                    '<td>' + complaint.category + '</td>' +
+                    '<td><img src="' + imageUrl + '" alt="Complaint Image" style="max-width: 100px; max-height: 100px;"></td>' +
+                    '</tr>';
+                tableBody.append(row);
+            });
+        },
+        error: function(error) {
+            console.error('Error fetching complaints:', error);
+        }
+    });
+}
