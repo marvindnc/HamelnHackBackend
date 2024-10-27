@@ -68,7 +68,7 @@ async def create_upload_file(file: UploadFile):
    
     id = db.save_complaint(c)
     print("Image inserted with id " + str(id))
-    add_class_with_image_to_text(id)
+    #add_class_with_image_to_text(id)
     db.save_complaint(c)
     
     return ComplaintGuess(guess="test", confidence=0.5)
