@@ -176,6 +176,7 @@ def do_inferencing(source, model_size, class_list):
             return
 
     logger.info("start inferencing")
+    print("start inferencing")
 
     # YOLO-Modell instanziieren
     model = YOLO(model_name(model_size, task="detect"))
@@ -243,6 +244,7 @@ def do_inferencing(source, model_size, class_list):
         cap.release()
         cv2.destroyAllWindows()
         logger.info("Stopped inferencing")
+        print("Stopped inferencing")
 
         #TODO Zugriff über [0] nicht möglich. Muss angepasst werden!
         # ggf. geloest mit predictions_output als dictionary

@@ -5,3 +5,11 @@ python-multipart
 requests
 psycopg2-binary
 psycopg2
+opencv-python
+ultralytics
+torch
+cuda-python
+torchvision 
+torchaudio
+ipykernel
+python-ffmpeg
