@@ -8,30 +8,28 @@ body {
     background-color: #ffffff;
     border-bottom: 2px solid #e0e0e0;
     padding: 15px 20px;
-}
-
-.navbar-brand {
     display: flex;
     align-items: center;
-    margin-right: auto;
+    justify-content: center;
+    position: relative;
 }
-
-.navbar-text {
+.navbar-brand {
     font-weight: bold;
     font-size: 20px;
     color: #0056b3;
 }
-
-.navbar-image {
+.navbar .fas {
+    margin-right: 8px;
+    color: #0056b3;
+}
+.top-left-image {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 50px;
     height: auto;
     border-radius: 8px;
-    margin-right: 10px;
-}
-
-.navbar-toggler {
-    border: none;
-    outline: none;
 }
 
 .container {
